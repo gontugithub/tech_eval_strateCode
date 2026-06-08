@@ -1,0 +1,50 @@
+services: 
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: stratecode_app 
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - stratecode_network
+    depends_on:
+      - stratecode_db
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: stratecode_nginx
+    restart: unless-stopped
+    ports:
+      - "8280:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - stratecode_network
+    depends_on:
+      - app
+  stratecode_db:
+    image: mysql:8.4
+    container_name: stratecode_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: stratecode_db
+      MYSQL_ROOT_PASSWORD: password_stratecode
+      MYSQL_USER: admin_stratecode
+      MYSQL_PASSWORD: password_stratecode
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - stratecode_network
+networks:
+  stratecode_network:
+    driver: bridge
+volumes:
+  mysql_data:
+    driver: local
