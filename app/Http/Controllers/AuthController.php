@@ -54,7 +54,7 @@ class AuthController extends Controller
 
             auth('api')->logout();;
 
-            return $this->successResponse(null, 'logut exitoso', 200);
+            return $this->successResponse(null, 'logout exitoso', 200);
 
         }
 
